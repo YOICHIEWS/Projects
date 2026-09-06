@@ -1,0 +1,209 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <iomanip>
+
+// No "using namespace std;"
+
+double calculateAverage(const std::vector<double>& prices) {
+    double sum = 0;
+
+    for (double price : prices) {
+        sum += price;
+    }
+
+    return sum / prices.size();
+}
+
+double findHighest(const std::vector<double>& prices) {
+    double highest = prices[0];
+
+    for (double price : prices) {
+        if (price > highest) {
+            highest = price;
+        }
+    }
+
+    return highest;
+}
+
+double findLowest(const std::vector<double>& prices) {
+    double lowest = prices[0];
+
+    for (double price : prices) {
+        if (price < lowest) {
+            lowest = price;
+        }
+    }
+
+    return lowest;
+}
+
+// Calculates the average daily return
+double calculateAverageReturn(const std::vector<double>& prices) {
+    double totalReturn = 0;
+
+    for (int i = 1; i < prices.size(); i++) {
+        double dailyReturn =
+            (prices[i] - prices[i - 1]) / prices[i - 1];
+
+        totalReturn += dailyReturn;
+    }
+
+    return (totalReturn / (prices.size() - 1)) * 100;
+}
+
+// Calculates standard deviation of daily returns
+double calculateStandardDeviation(
+    const std::vector<double>& prices) {
+
+    std::vector<double> returns;
+
+    // First calculate each daily return
+    for (int i = 1; i < prices.size(); i++) {
+        double dailyReturn =
+            (prices[i] - prices[i - 1]) / prices[i - 1];
+
+        returns.push_back(dailyReturn);
+    }
+
+    // Calculate the average return
+    double mean = 0;
+
+    for (double r : returns) {
+        mean += r;
+    }
+
+    mean /= returns.size();
+
+    // Calculate variance
+    double variance = 0;
+
+    for (double r : returns) {
+        variance += std::pow(r - mean, 2);
+    }
+
+    variance /= returns.size();
+
+    // Standard deviation = square root of variance
+    return std::sqrt(variance) * 100;
+}
+
+void simpleTradingSimulation(
+    const std::vector<double>& prices) {
+
+    double money = 10000.0;
+    double shares = 0;
+
+    std::cout << "\n--- Simple Trading Simulation ---\n";
+
+    for (int i = 1; i < prices.size(); i++) {
+
+        double change =
+            (prices[i] - prices[i - 1]) / prices[i - 1];
+
+        // Buy if the price falls by 2% or more
+        if (change <= -0.02 && money > prices[i]) {
+
+            shares = money / prices[i];
+            money = 0;
+
+            std::cout << "Day " << i + 1
+                      << ": BUY at "
+                      << prices[i] << "\n";
+        }
+
+        // Sell if the price rises by 3% or more
+        else if (change >= 0.03 && shares > 0) {
+
+            money = shares * prices[i];
+            shares = 0;
+
+            std::cout << "Day " << i + 1
+                      << ": SELL at "
+                      << prices[i] << "\n";
+        }
+
+        else {
+            std::cout << "Day " << i + 1
+                      << ": HOLD\n";
+        }
+    }
+
+    // Value remaining shares using the last price
+    if (shares > 0) {
+        money = shares * prices.back();
+    }
+
+    std::cout << std::fixed
+              << std::setprecision(2);
+
+    std::cout << "\nStarting money : Rs. 10000.00\n";
+    std::cout << "Final value    : Rs. "
+              << money << "\n";
+
+    std::cout << "Profit/Loss    : Rs. "
+              << money - 10000 << "\n";
+}
+
+int main() {
+
+    // Sample historical closing prices
+    std::vector<double> prices = {
+        100, 102, 101, 105, 108,
+        106, 103, 107, 111, 115,
+        113, 118
+    };
+
+    std::cout << "=====================================\n";
+    std::cout << "        STOCK PRICE ANALYZER\n";
+    std::cout << "=====================================\n\n";
+
+    std::cout << std::fixed
+              << std::setprecision(2);
+
+    std::cout << "Stock Prices:\n";
+
+    for (double price : prices) {
+        std::cout << price << " ";
+    }
+
+    std::cout << "\n\n";
+
+    double average = calculateAverage(prices);
+    double highest = findHighest(prices);
+    double lowest = findLowest(prices);
+
+    std::cout << "--- Price Analysis ---\n";
+    std::cout << "Average Price : "
+              << average << "\n";
+
+    std::cout << "Highest Price : "
+              << highest << "\n";
+
+    std::cout << "Lowest Price  : "
+              << lowest << "\n";
+
+    double averageReturn = calculateAverageReturn(prices);
+    double standardDeviation =
+        calculateStandardDeviation(prices);
+
+    std::cout << "\n--- Risk Analysis ---\n";
+
+    std::cout << "Average Daily Return : "
+              << averageReturn << "%\n";
+
+    std::cout << "Standard Deviation   : "
+              << standardDeviation << "%\n";
+
+    std::cout << "Volatility           : "
+              << standardDeviation << "%\n";
+
+    simpleTradingSimulation(prices);
+
+    std::cout << "\n=====================================\n";
+    std::cout << "              DONE\n";
+    std::cout << "=====================================\n";
+
+    return 0;
+}
